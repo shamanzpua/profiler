@@ -1,0 +1,23 @@
+{
+    "name": "shamanzpua/profiler",
+    "description": "Code profiler",
+    "type": "library",
+    "authors": [
+        {
+            "name": "shaman",
+            "email": "yura224k@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "shamanzpua\\Profiler\\": "src/"
+
+        },
+        "files": [
+            "src/profiler.php"
+        ]
+    },
+    "require": {
+        "php" : ">=7.0.0"
+    }
+}
