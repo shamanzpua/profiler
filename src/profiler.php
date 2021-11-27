@@ -11,7 +11,10 @@ function profileEnd($breakPoint = null)
     profile($breakPoint);
     $profiler = Profiler::getInstance();
     $profiler->disableDestructBreakPoint();
+    $logStorage = $profiler->getLogStorage();
+    Profiler::unset();
     unset($profiler);
+    Profiler::getInstance()->setLogStorage($logStorage);
 }
 
 function profile($metadata = null)

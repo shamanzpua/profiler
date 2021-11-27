@@ -49,6 +49,11 @@ class Profiler
         return self::$instance;
     }
 
+    public static function unset()
+    {
+        self::$instance = null;
+    }
+
     public function disableDestructBreakPoint()
     {
         $this->breakPointOnDestruct = false;
@@ -77,6 +82,14 @@ class Profiler
     {
         $this->logStorage = $logStorage;
         return $this;
+    }
+
+    /**
+     * @return ILogStorage
+     */
+    public function getLogStorage() : ILogStorage
+    {
+        return $this->logStorage;
     }
 
     /**
