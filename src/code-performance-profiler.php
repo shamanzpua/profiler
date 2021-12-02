@@ -1,15 +1,16 @@
 <?php
 use shamanzpua\Profiler\Profiler;
 
-function profileStart(string $name)
+function performance_profiling_start(string $name)
 {
-    profile(['name' => $name]);
+    profiler_breakpoint(['name' => $name]);
 }
 
-function profileEnd($breakPoint = null)
+function performance_profiling_stop($breakPoint = null)
 {
-    profile($breakPoint);
     $profiler = Profiler::getInstance();
+    $profiler->setMissingTraceReason(Profiler::REASON_PROFILING_END);
+    profiler_breakpoint($breakPoint);
     $profiler->disableDestructBreakPoint();
     $logStorage = $profiler->getLogStorage();
     Profiler::unset();
@@ -17,7 +18,7 @@ function profileEnd($breakPoint = null)
     Profiler::getInstance()->setLogStorage($logStorage);
 }
 
-function profile($metadata = null)
+function profiler_breakpoint($metadata = null)
 {
     $profiler = Profiler::getInstance();
 

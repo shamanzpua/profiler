@@ -14,7 +14,7 @@
 
         },
         "files": [
-            "src/profiler.php"
+            "src/code-performance-profiler.php"
         ]
     },
     "require": {

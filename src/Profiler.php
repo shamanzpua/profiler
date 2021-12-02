@@ -27,9 +27,11 @@ class Profiler
      */
     private $customProfilers = [];
 
-    private $missingTraceParamReason = 'UNKNOWN';
+    protected $missingTraceParamReason;
 
+    const REASON_UNKNOWN = 'UNKNOWN';
     const REASON_PROFILING_END = 'PROFILING END';
+    const REASON_PROFILING_START = 'PROFILING START';
 
     /**
      * @var Profiler|null $instance
@@ -39,6 +41,7 @@ class Profiler
     public function __construct()
     {
         $this->logStorage = new NullStorage();
+        $this->setMissingTraceReason(static::REASON_PROFILING_START);
     }
 
     public static function getInstance() : Profiler
@@ -103,6 +106,27 @@ class Profiler
     }
 
     /**
+     * @return mixed
+     */
+    protected function getMissingTraceReason()
+    {
+        return $this->missingTraceParamReason;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isKnownMissingTraceReason() : bool
+    {
+        return $this->missingTraceParamReason !== static::REASON_UNKNOWN;
+    }
+
+    public function setMissingTraceReason($reason = self::REASON_UNKNOWN)
+    {
+        $this->missingTraceParamReason = $reason;
+    }
+
+    /**
      * @param null $breakPointName
      * @return false|void
      */
@@ -119,13 +143,22 @@ class Profiler
         }
         $trace = (new \Exception())->getTrace();
 
+
+
+        $class = $trace[2]['class'] ?? false;
+
         $this->currentPoint = [
             'time' => $time,
-            'class' => $trace[2]['class'] ?? $this->missingTraceParamReason,
-            'method' => $trace[2]['function'] ?? $this->missingTraceParamReason,
-            'line' => $trace[1]['line'] ?? $this->missingTraceParamReason,
+            'class' => $class ?: $this->getMissingTraceReason(),
+            'method' => $trace[2]['function'] ?? $this->getMissingTraceReason(),
+            'line' => $trace[1]['line'] ?? $this->getMissingTraceReason(),
             'break_point' => $breakPointName
         ];
+
+        if (!$class && $this->isKnownMissingTraceReason()) {
+            $this->currentPoint['specialBreakpoint'] = $this->getMissingTraceReason();
+        }
+
 
         $this->currentPoint['duration'] =  $this->prevTime ? $this->getDuration($time, $this->prevTime) : 0;
 
@@ -133,6 +166,7 @@ class Profiler
 
         $this->prevTime = $time;
         $this->points[] = $this->currentPoint;
+        $this->setMissingTraceReason();
     }
 
     private function runCustomProfilers()
@@ -141,8 +175,6 @@ class Profiler
             $this->currentPoint = array_merge($this->currentPoint, $customProfiler->run());
         }
     }
-
-
 
     /**
      * @return bool
@@ -166,7 +198,7 @@ class Profiler
         }
 
         if ($this->breakPointOnDestruct) {
-            $this->missingTraceParamReason = static::REASON_PROFILING_END;
+            $this->setMissingTraceReason(static::REASON_PROFILING_END);
             $this->breakpoint();
         }
 
