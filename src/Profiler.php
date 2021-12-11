@@ -16,6 +16,7 @@ class Profiler
     private $currentPoint;
     private $breakPointOnDestruct = true;
     private $name;
+    private $logDurationThreshold = 0;
 
     /**
      * @var ILogStorage $logStorage
@@ -70,6 +71,24 @@ class Profiler
         $this->name = $name;
     }
 
+    /**
+     * @param int $value
+     * @return void
+     */
+    public function setLogDurationThreshold(int $value) : Profiler
+    {
+        $this->logDurationThreshold = $value;
+        return $this;
+    }
+
+    /**
+     * @return void
+     */
+    public function getLogDurationThreshold() : int
+    {
+        return $this->logDurationThreshold;
+    }
+
     public function initCustomProfilers()
     {
         foreach ($this->customProfilers as $customProfiler) {
@@ -103,6 +122,14 @@ class Profiler
     {
         $this->customProfilers[] = $customProfiler;
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCustomProfilers() : array
+    {
+        return $this->customProfilers;
     }
 
     /**
@@ -218,6 +245,8 @@ class Profiler
 
         $name = $this->name;
 
-        $this->logStorage->put($name, $profileResult, $this->startTime);
+        if ($totalDuration >= $this->logDurationThreshold) {
+            $this->logStorage->put($name, $profileResult, $this->startTime);
+        }
     }
 }
